@@ -1,0 +1,146 @@
+import pandas as pd
+import numpy 
+import matplotlib.pyplot as plt
+from matplotlib.ticker import StrMethodFormatter 
+import statsmodels.formula.api as smf 
+import thinkstats2
+import thinkplot
+
+df = pd.read_csv('Aviation Data.csv')
+df.dropna
+print(df)
+
+df = df.apply(pd.to_numeric)
+
+#Histograms of each of the variables
+df.hist(column = 'ActvTtl')
+plt.title('Total Active Aircrafts')
+plt.xlabel('Total Active Aircrafts')
+plt.ylabel('Frequency')
+
+df.hist(column = 'FltHrsTtl')
+plt.title('Total Flight Hours')
+plt.xlabel('Total Flight Hours (thousands)')
+plt.ylabel('Frequency')
+
+df.hist(column = 'FatalTtl')
+plt.title('Total Fatalities')
+plt.xlabel('Total Fatalities')
+plt.ylabel('Frequency')
+
+df.hist(column = 'AccTtl')
+plt.title('Total Accidents')
+plt.xlabel('Total Accidents')
+plt.ylabel('Frequency')
+
+df.hist(column = 'FatalRT')
+plt.title('Fatality Rate')
+plt.xlabel('Fatality Rate')
+plt.ylabel('Frequency')
+
+#Mean, Mode, Spread and Tail for each 
+mean1 = df.ActvTtl.mean()
+print('ActvTtl Mean =', (mean1))
+mode1 = df.ActvTtl.mode()
+print('ActvTtl Mode =', (mode1))
+var1 = df.ActvTtl.var()
+print('ActvTtl Spread =', (var1))
+
+mean2 = df.FltHrsTtl.mean()
+print('FltHrsTtl Mean =', (mean2))
+mode2 = df.FltHrsTtl.mode()
+print('FltHrsTtl Mode =', (mode2))
+var2 = df.FltHrsTtl.var()
+print('FltHrsTtl Spread =', (var2))
+
+mean3 = df.FatalTtl.mean()
+print('FatalTtl Mean =', (mean3))
+mode3 = df.FatalTtl.mode()
+print('FatalTtl Mode =', (mode3))
+var3 = df.FatalTtl.var()
+print('FatalTtl Spread =', (var3))
+
+mean4 = df.AccTtl.mean()
+print('AccTtl Mean =', (mean4))
+mode4 = df.AccTtl.mode()
+print('AccTtl Mode =', (mode4))
+var4 = df.AccTtl.var()
+print('AccTtl Spread =', (var4))
+
+mean5 = df.FatalRT.mean()
+print('df.FatalRT Mean =', (mean5))
+mode5 = df.FatalRT.mode()
+print('FatalRT Mode =', (mode5))
+var5 = df.FatalRT.var()
+print('FatalRT Spread =', (var5))
+
+old = df[df.Year <= 2005]
+print('Old', (old))
+old2 = old.FatalRT
+print('old 2', (old2))
+recent = df[df.Year >= 2006]
+print('Recent', (recent))
+recent2 = recent.FatalRT
+print('Recent 2', (recent2))
+
+#Scatter plots
+plt.scatter(df.ActvTtl, df.FatalTtl)
+plt.xlabel('Total Active Aircraft')
+plt.ylabel('Total Fatalities')
+plt.title('Active Aircraft Vs. Fatalities')
+plt.show()
+
+plt.scatter(df.FltHrsTtl, df.FatalRT)
+plt.xlabel('Total Flight Hours')
+plt.ylabel('Fatality Rate')
+plt.title('Total Flights Hours Vs. Fatality Rate')
+plt.show()
+
+plt.scatter(df.Year, df.FatalTtl)
+plt.xlabel('Years')
+plt.ylabel('Total Fatalities')
+plt.title('Fatalities by Year')
+plt.show()
+
+plt.scatter(df.Year, df.ActvTtl)
+plt.xlabel('Years')
+plt.ylabel('Active Aircraft')
+plt.title('Active Aircraft by Year')
+plt.show()
+
+flt_diff = old.FltHrsTtl.mean()-recent.FltHrsTtl.mean() 
+print('flt_diff =', (flt_diff))
+fatalRT_diff = old.FatalRT.mean()-recent.FatalRT.mean() 
+print('fatalRT_diff =', (fatalRT_diff))
+
+#Multiple regression comparing total flight hours to fatality rate
+results = smf.ols('FatalRT ~ FltHrsTtl', data=df).fit() 
+slope = results.params['FltHrsTtl']
+print(slope*flt_diff)
+
+#pmf fatality rate
+OldFatalRT_pmf = thinkstats2.Pmf(old2)
+RecentFatalRT_pmf = thinkstats2.Pmf(recent2)
+thinkplot.PrePlot(2, cols=2)
+width = 0.01
+thinkplot.Hist(OldFatalRT_pmf, align='right', width=width, color = 'blue')
+thinkplot.Hist(RecentFatalRT_pmf, align='left', width=width, color = 'green')
+thinkplot.Config(xlabel = 'Fatality Rate', ylabel = 'Probability', axis=[0,4.0,0,.1])
+thinkplot.Show()
+
+thinkplot.PrePlot(2)
+thinkplot.SubPlot(2)
+thinkplot.Pmfs([OldFatalRT_pmf, RecentFatalRT_pmf])
+thinkplot.Show(xlabel = 'Fatality Rate', ylabel = 'Probability', axis=[0,4.0,0,.1])
+
+#cdf of fatality rate
+cdf = thinkstats2.Cdf(df.FatalTtl, label = 'Total Fatalities')
+thinkplot.Cdf(cdf)
+thinkplot.Show(xlabel='Total Fatalities', ylabel='CDF')
+
+
+
+
+
+
+
